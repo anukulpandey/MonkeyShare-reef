@@ -1,0 +1,28 @@
+{
+  "name": "minimal-ui-example",
+  "version": "0.0.1",
+  "main": "src/index.ts",
+  "license": "MIT",
+  "dependencies": {
+    "@reef-chain/util-lib": "^0.0.8",
+    "@reef-defi/evm-provider": "^1.0.9",
+    "@reef-defi/extension-dapp": "^1.0.14",
+    "@reef-defi/extension-inject": "^1.0.14",
+    "@reef-defi/util-crypto": "^7.8.2",
+    "crypto-js": "^4.1.1",
+    "esbuild": "^0.14.42",
+    "ethers": "^5.6.9",
+    "events": "^3.3.0",
+    "rxjs": "^7.5.6",
+    "stream": "^0.0.2"
+  },
+  "scripts": {
+    "build": "esbuild src/index.ts --bundle --outfile=public/js/index.js --platform=browser --tsconfig=tsconfig.json",
+    "start": "esbuild src/index.ts --bundle --outfile=public/js/index.js --platform=browser --watch --tsconfig=tsconfig.json",
+    "serve": "esbuild src/index.ts --bundle --servedir=public --outdir=public/js --platform=browser --tsconfig=tsconfig.json --sourcemap",
+    "deploy": "yarn build && firebase deploy --only hosting"
+  },
+  "browser": {
+    "crypto": false
+  }
+}

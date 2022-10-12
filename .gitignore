@@ -1,0 +1,5 @@
+/.idea
+/node_modules/
+/public/js/index.js
+/ipfssetup/.env
+/ipfssetup/node_modules/

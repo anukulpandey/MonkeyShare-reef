@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>MonkeyShare</title> 
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/css/bootstrap.min.css" rel="stylesheet" integrity="sha384-Zenh87qX5JnK2Jl0vWa8Ck2rdkQ2Bzep5IDxbcnCeuOxjzrPF/et3URy9Bv1WTRi" crossorigin="anonymous">
+</head>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.2.2/dist/js/bootstrap.bundle.min.js" integrity="sha384-OERcA2EqjJCMA+/3y+gxIOqMEjwtxJY7qPCqsdltbNJuaOe923+mo//f6V8Qbsw3" crossorigin="anonymous"></script>
+  <link rel="stylesheet" href="styles.css">
+    <script>
+        var selectedAddress;
+        document.addEventListener('signer-change', (evt) => {
+            var addr = evt.detail;
+            selectedAddress = addr;
+            resetUI();
+            document.body.classList.add("extension-initialized");
+            displaySignerAddress(addr);
+            getContractValue(addr);
+        });
+        document.addEventListener('clear-error', clearError);
+        document.addEventListener('tx-progress', evt => {
+            document.body.classList.add("transaction-progress");
+        });
+        document.addEventListener('dapp-connected', evt => {
+            document.body.classList.add("connected");
+        });
+        document.addEventListener('tx-complete', evt => {
+            document.body.classList.remove("transaction-progress");
+        });
+        document.addEventListener('display-error', (evt => {
+            displayError(evt.detail);
+        }));
+        document.addEventListener('balance-value', (evt => {
+            document.body.getElementsByClassName('reef-balance')[0].innerHTML = `<span style="font-weight:bold">💰 Balance:</span> <button type="button" class="btn btn-outline-dark">${evt.detail} REEF</button> `;
+        }));
+        document.addEventListener('evm-connected', () => document.body.classList.add("evm-connected"));
+        document.addEventListener('contract-value', (evt => {
+            if(evt.detail==true){
+                document.getElementsByClassName('contract-value')[0].innerHTML = `<br><a href="http://127.0.0.1:5000/dashboard/${selectedAddress}">📂 Open Me</a>`;
+            }
+            else{
+                document.getElementsByClassName('contract-value')[0].innerHTML = 'Click on the button below to start using this Dapp!';
+            }
+        }));
+
+        function bindEvm(addr) {
+            document.dispatchEvent(new CustomEvent('bind-evm-address', { detail: addr }));
+        }
+
+        function getContractValue(addr) {
+            document.dispatchEvent(new CustomEvent('get-contract-value', { detail: addr }));
+        }
+
+        function toggleContractValue(addr) {
+            document.dispatchEvent(new CustomEvent('toggle-contract-value', { detail: addr }));
+        }
+
+        function displayError(e) {
+            resetUI();
+            document.body.classList.add("reef-extension-error");
+            document.getElementsByClassName('error-msg')[0].innerHTML = e.message || e;
+        }
+
+        function clearError() {
+            document.body.classList.remove("reef-extension-error");
+            document.getElementsByClassName('error-msg')[0].innerHTML = '';
+        }
+      
+        async function displaySignerAddress(addr) {
+            document.body.getElementsByClassName('selected-signer')[0].innerHTML = `📪 <b>Selected Address </b> : <button type="button" class="btn btn-outline-info" onclick="navigator.clipboard.writeText('${addr}')">${addr}</button>`;
+            document.getElementsByClassName('wallet-btn')[0].innerHTML="✅ Connected"
+            document.getElementById('xyz').style.display="block";
+        }
+
+        async function resetUI() {
+            document.body.classList.remove("evm-connected");
+            document.body.classList.remove("connected");
+            document.body.classList.remove("reef-extension-error");
+            document.getElementsByClassName('contract-value')[0].innerHTML = '';
+            document.getElementsByClassName('selected-signer')[0].innerHTML = '';
+            document.getElementsByClassName('reef-balance')[0].innerHTML = '';
+            clearError();
+        }
+    </script>
+
+    <script src="js/index.js"></script>
+    <style>
+        .content {
+            display: none;
+        }
+
+        .extension-initialized.connected .content {
+            display: block;
+        }
+
+        
+        .extension-initialized .connecting {
+            display: none;
+        }
+
+        .error-display {
+            display: none;
+        }
+
+        .reef-extension-error .error-display {
+            display: block;
+        }
+
+        .content {
+            display: none;
+        }
+
+        code {
+            background-color: #ECEFF1;
+        }
+
+        .evm-contract-calls {
+            display: none;
+        }
+
+        .evm-connected .evm-contract-calls {
+            display: block;
+        }
+
+        .evm-connected .bind-evm {
+            display: none;
+        }
+
+        .transaction-progress .bind-start {
+            display: none;
+        }
+
+        .transaction-progress-display {
+            display: none;
+        }
+
+        .transaction-progress .transaction-progress-display {
+            display: block;
+        }
+
+        .transaction-progress .tx-btns {
+            display: none;
+        }
+
+        .tx-btns {
+            display: block;
+        }
+
+        #xyz{
+            display: none;
+        }
+    </style>
+</head>
+<body>
+<nav>
+    <nav class="navbar navbar-dark bg-dark">
+        <div class="container-md">
+          <a class="navbar-brand" href="/">🐒 MonkeyShare</a>
+          <button class="btn btn-outline-light wallet-btn" type="button">⌛ Connecting Wallet</button>
+        </div>
+      </nav>
+</nav>
+<div class="connecting container my-3 center">
+    <div class="rf d-flex justify-content-evenly" >
+        <img src="monkey.gif">
+    </div>
+</div>
+
+<div id="xyz" class="container text-bg-light my-3 p-2" >
+    <div class="container  d-flex justify-content-evenly ">
+        
+        <div class="selected-signer"></div>
+        <div class="reef-balance"></div>
+    </div>
+
+</div>
+<div class="content">
+    <div class="bind-evm">
+        <div class="bind-start">
+            <p>Enough balance to enable EVM contracts for account</p>
+            <button type="button" onclick="bindEvm(selectedAddress)">Connect EVM layer</button>
+        </div>
+    </div>
+    <div class="wrapper">
+
+        <header>
+            <img src="./imgs/Mountain.png" class="background">
+            <img src="./imgs/Trees.png" class="foreground">
+            <h1 class="title">Welcome!</h1>
+          </header>
+           <section>
+            <h3>MonkeyShare</h3>
+            <p>Made with ❤️‍🔥 using <a href="reef.io">Reef</a> </p>
+            <p>Connect your reef wallet to this Dapp & you can store unlimited files without paying any fees.<br> PS: You only need to pay gas fee for the first time for registration purpose only.</p><br>
+            So basically we are using your wallet address just to generate a new account for you to store your files on the IPFS file system.<br>
+            <div class="contract-value"></div>
+            <br>
+            <button type="button" class="btn btn-primary" onclick="toggleContractValue(selectedAddress)">Start Using ☄️</button>
+            <div class="evm-contract-calls container my-3 p-4">
+        
+                <div class="tx-btns">
+                    <h3 class="contract-value"></h3>
+                    <button type="button" onclick="toggleContractValue(selectedAddress)">Upload File</button>
+                </div>
+            </div>
+           </section>
+           
+        <div class="transaction-progress-display">
+            <p>Transaction in progress ...</p>
+        </div>
+    </div>
+    <div class="error-display">
+        <h3>ERROR</h3>
+        <div class="error-msg"></div>
+    </div>
+    
+    </div>
+    </body>
+</html>
